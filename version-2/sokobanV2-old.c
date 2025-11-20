@@ -2,7 +2,7 @@
  * @file sokoban.c
  * @brief jeu du Sokoban en C
  * @author Titouan Moquet
- * @version V2.2.3
+ * @version V2.1.9
  * @date 17/11/2025
  *
  * Jeu du Sokoban réalisé en C jouable dans le terminal dans le cadre de la
@@ -12,7 +12,6 @@
  */
 
 // librairies inclusent
-#include <complex.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -89,8 +88,8 @@ void sauvegarde_jeu(t_plateau plateau);
 void afficher_entete(int nbDeplacement, char nomNiveau[]);
 void affiche_plateau(t_plateau plateau, int niveauZoom);
 void affiche_plateau_largeur(t_plateau plateau, int niveauZoom, int longueur);
-void affichage_complet(t_plateau plateau, t_tabDeplacement tabDeplacement,
-                       char nomNiveau[], int nbDeplacement, int niveauZoom);
+void affichage_complet(t_plateau plateau, char nomNiveau[], int nbDeplacement,
+                       int niveauZoom);
 void recherche_pos_jo(t_plateau plateau, int *posJoX, int *posJoY);
 void deplacer(t_plateau plateau, t_plateau plateauBase,
               t_tabDeplacement tabDeplacement, char touche, int *posJoX,
@@ -98,9 +97,8 @@ void deplacer(t_plateau plateau, t_plateau plateauBase,
 
 void remplace_carac_deplacement(t_plateau tableau, t_plateau plateauBase,
                                 int *posJoX, int *posJoY);
-void annuler_deplacement(t_plateau plateau, t_plateau plateauBase,
-                         t_tabDeplacement tabDeplacement, int *posJoX,
-                         int *posJoY, int *nbDeplacement);
+void annuler_deplacement(t_plateau plateau, t_tabDeplacement tabDeplacement,
+                         int *posJoX, int *posJoY, int *nbDeplacement);
 
 bool gagne(t_plateau plateau, t_plateau plateauBase);
 void affiche_message_fin(int nbDeplacement);
@@ -110,8 +108,8 @@ void jeu(char touche, t_plateau plateau, t_plateau plateauBase,
          t_tabDeplacement tabDeplacement, int *posJoX, int *posJoY,
          int *nbDeplacement, char nomNiveau[], int *niveauZoom, bool gagner);
 void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
-                           int leDeplacement, int nbDeplacement);
-void affiche_leTab(t_tabDeplacement tabDeplacement, int nbDeplacement);
+                           int leDeplacement);
+
 /**
  * @brief Entrée du programme
  * @return EXIT_SUCCESS : arrêt normal du programme
@@ -138,8 +136,7 @@ int main() {
     charger_partie(plateau, nomNiveau);
     charger_partie(plateauBase, nomNiveau);
     // premier affichage
-    affichage_complet(plateau, tabDeplacement, nomNiveau, nbDeplacement,
-                      niveauZoom);
+    affichage_complet(plateau, nomNiveau, nbDeplacement, niveauZoom);
     // position initiale du joueur
     recherche_pos_jo(plateau, &posJoX, &posJoY);
     // jeu
@@ -150,8 +147,7 @@ int main() {
         jeu(touche, plateau, plateauBase, tabDeplacement, &posJoX, &posJoY,
             &nbDeplacement, nomNiveau, &niveauZoom, gagner);
         gagner = gagne(plateau, plateauBase);
-        affichage_complet(plateau, tabDeplacement, nomNiveau, nbDeplacement,
-                          niveauZoom);
+        affichage_complet(plateau, nomNiveau, nbDeplacement, niveauZoom);
       }
       if (touche == FIN) {
         sauvegarde_jeu(plateau);
@@ -195,12 +191,7 @@ void jeu(char touche, t_plateau plateau, t_plateau plateauBase,
     charger_partie(plateau, nomNiveau);
     recherche_pos_jo(plateau, &(*posJoX), &(*posJoY));
     *nbDeplacement = 0;
-    affichage_complet(plateau, tabDeplacement, nomNiveau, *nbDeplacement,
-                      *niveauZoom);
-  }
-  if (touche == UNDO) {
-    annuler_deplacement(plateau, plateauBase, tabDeplacement, &(*posJoX),
-                        &(*posJoY), &(*nbDeplacement));
+    affichage_complet(plateau, nomNiveau, *nbDeplacement, *niveauZoom);
   }
   if ((touche == ZOOM) && (*niveauZoom < MAX_ZOOM)) {
     *niveauZoom += 1;
@@ -394,7 +385,7 @@ void deplacer(t_plateau plateau, t_plateau plateauBase,
       leDeplacement = sansCaisse;
     }
   }
-  memoriser_deplacement(touche, tabDeplacement, leDeplacement, *nbDeplacement);
+  memoriser_deplacement(touche, tabDeplacement, leDeplacement);
 
   *posJoX += directionX; // actualisation des coordonnées
   *posJoY += directionY;
@@ -406,11 +397,10 @@ void deplacer(t_plateau plateau, t_plateau plateauBase,
 }
 
 void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
-                           int leDeplacement, int nbDeplacement) {
-
+                           int leDeplacement) {
   char caracDeplacement;
   if (leDeplacement == avecCaisse) {
-    // printf("avec caisse");
+    //printf("avec caisse");
     if (touche == HAUT) {
       caracDeplacement = HAUT_AVEC_CAISSE;
     } else if (touche == BAS) {
@@ -422,7 +412,7 @@ void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
     }
 
   } else if (leDeplacement == sansCaisse) {
-    // printf("sans caisse");
+    //printf("sans caisse");
     if (touche == HAUT) {
       caracDeplacement = HAUT_SANS_CAISSE;
     } else if (touche == BAS) {
@@ -433,64 +423,13 @@ void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
       caracDeplacement = DROITE_SANS_CAISSE;
     }
   }
-  tabDeplacement[nbDeplacement] = caracDeplacement;
+
 }
 
-/**
- * @brief Procédure qui permet d'annuler un déplacement
- * @param plateau de type t_plateau, tableau de jeu.
- * @param plateauBase de type t_plateau, tableau de sauvegarde des déplacements 
- * @param posJoX de type entier, sur quel ligne du tableau est le joueur,
- * en entrer et sortie
- * @param posJoY de type entier; sur quel colonne du tableau est le joueur,
- * en entrer et sortie
- * @param nbDeplacement int, nombre de déplacements du joueur 
- */
-
-void annuler_deplacement(t_plateau plateau, t_plateau plateauBase,
-                         t_tabDeplacement tabDeplacement, int *posJoX,
-                         int *posJoY, int *nbDeplacement) {
-// faire le remplacement correcte des elememts 
-  if (*nbDeplacement > 0) {
-    if (tabDeplacement[*nbDeplacement - 1] == HAUT_SANS_CAISSE) {
-      plateau[*posJoX][*posJoY] = VIDE;
-      plateau[*posJoX + 1][*posJoY] = JOUEUR;
-      *posJoX += 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == BAS_SANS_CAISSE) {
-      plateau[*posJoX][*posJoY] = VIDE;
-      plateau[*posJoX - 1][*posJoY] = JOUEUR;
-      *posJoX -= 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == GAUCHE_SANS_CAISSE) {
-      plateau[*posJoX][*posJoY] = VIDE;
-      plateau[*posJoX][*posJoY + 1] = JOUEUR;
-      *posJoY += 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == DROITE_SANS_CAISSE) {
-      plateau[*posJoX][*posJoY] = VIDE;
-      plateau[*posJoX][*posJoY - 1] = JOUEUR;
-      *posJoY -= 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == HAUT_AVEC_CAISSE) {
-      plateau[*posJoX][*posJoY] = CAISSE;
-      plateau[*posJoX + 1][*posJoY] = JOUEUR;
-      plateau[*posJoX - 1][*posJoY] = VIDE;
-      *posJoX += 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == BAS_AVEC_CAISSE) {
-      plateau[*posJoX][*posJoY] = CAISSE;
-      plateau[*posJoX - 1][*posJoY] = JOUEUR;
-      plateau[*posJoX + 1][*posJoY] = VIDE;
-      *posJoX -= 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == GAUCHE_AVEC_CAISSE) {
-      plateau[*posJoX][*posJoY] = CAISSE;
-      plateau[*posJoX][*posJoY + 1] = JOUEUR;
-      plateau[*posJoX][*posJoY - 1] = VIDE;
-      *posJoY += 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == DROITE_AVEC_CAISSE) {
-      plateau[*posJoX][*posJoY] = CAISSE;
-      plateau[*posJoX][*posJoY - 1] = JOUEUR;
-      plateau[*posJoX][*posJoY + 1] = VIDE;
-      *posJoY -= 1;
-    }
-
-    *nbDeplacement -= 1;
+void annuler_deplacement(t_plateau plateau, t_tabDeplacement tabDeplacement,
+                         int *posJoX, int *posJoY, int *nbDeplacement) {
+  if (tabDeplacement[*nbDeplacement]) {
+    printf("otot");
   }
 }
 
@@ -598,7 +537,7 @@ void afficher_entete(int nbDeplacement, char nomNiveau[]) {
   printf("   q : gauche      ←  ");
   printf("   d : droite      →\n" RESET);
   printf("\n");
-  printf(GREEN "   u : annuler le dernier déplacement\n" RESET);
+  printf(GREEN "u : annuler le dernier déplacement" RESET);
   printf(YELLOW "   r : recommencer la partie\n" RESET);
   printf(RED "   x : quitter le jeu\n" RESET);
   // affichage du nombre déplacements (changement de l'alignement)
@@ -664,14 +603,13 @@ void affiche_plateau_largeur(t_plateau plateau, int niveauZoom, int longueur) {
  * @param nomNiveau chaine de caratères, nom du niveau en cours.
  * @param nbDeplacement entier, nombre de déplacement du joueur.
  */
-void affichage_complet(t_plateau plateau, t_tabDeplacement tabDeplacement,
-                       char nomNiveau[], int nbDeplacement, int niveauZoom) {
+void affichage_complet(t_plateau plateau, char nomNiveau[], int nbDeplacement,
+                       int niveauZoom) {
   system("clear");
 
   afficher_entete(nbDeplacement, nomNiveau);
   affiche_plateau(plateau, niveauZoom);
   printf("Titouan Moquet 1D2 IUT Lannion 2025-2026\n");
-  affiche_leTab(tabDeplacement, nbDeplacement);
 }
 
 /**
@@ -723,10 +661,3 @@ void affiche_niveau() {
 }
 
 // Titouan Moquet 1D2 IUT Lannion 2025-2026
-
-void affiche_leTab(t_tabDeplacement tabDeplacement, int nbDeplacement) {
-  for (int i = 0; i < nbDeplacement; i++) {
-    printf("%c ", tabDeplacement[i]);
-  }
-  printf("\n");
-}

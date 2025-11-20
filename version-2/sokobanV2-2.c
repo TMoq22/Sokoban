@@ -2,7 +2,7 @@
  * @file sokoban.c
  * @brief jeu du Sokoban en C
  * @author Titouan Moquet
- * @version V2.2.0
+ * @version V2.2.3
  * @date 17/11/2025
  *
  * Jeu du Sokoban réalisé en C jouable dans le terminal dans le cadre de la
@@ -728,4 +728,5 @@ void affiche_leTab(t_tabDeplacement tabDeplacement, int nbDeplacement) {
   for (int i = 0; i < nbDeplacement; i++) {
     printf("%c ", tabDeplacement[i]);
   }
+  printf("\n");
 }

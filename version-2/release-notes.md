@@ -10,6 +10,13 @@ Mise à jour du Sokoban
 > Le projet est toujours en cours de réalisation. Certains éléments sont donc susceptibles de ne pas fonctionner.
 
 -->
+## Version V2.3.3
+- ajout procedure enrigistrer déplacements 
+- modification des méssages de fin de partie 
+- ajout de couleurs sur d'autres textes 
+- commentaire sur certaines procedures 
+
+
 ## Version V2.3.2 
 - modification du main :
   - création d'une procédure "rejouer" pour alléger la main.

@@ -4,7 +4,7 @@
  * @author Titouan Moquet
  * @version V2.3.2
  * @date 22/11/2025
- * 
+ *
  * Jeu du Sokoban réalisé en C jouable dans le terminal dans le cadre de la
  * SAE 1.01, IUT Lannion Info 1D2 2025-2026
  *
@@ -65,8 +65,14 @@ const char VIDE = ' ';
 // vrai et faux, oui et non
 const char YES = 'y';
 const char NO = 'n';
-const char VRAI = true;
-const char FAUX = false;
+const bool VRAI = true;
+const bool FAUX = false;
+
+
+const char AFF_TAB ='i';
+
+
+
 // pour zoom
 const char ZOOM = '+';
 const char DEZOOM = '-';
@@ -222,7 +228,7 @@ void rejouer(char *touche, char *jouer, bool gagner) {
 void jeu(char touche, t_plateau plateau, t_plateau plateauBase,
          t_tabDeplacement tabDeplacement, int *posJoX, int *posJoY,
          int *nbDeplacement, char nomNiveau[], int *niveauZoom, bool gagner) {
-
+  bool afficherTab = FAUX;
   deplacer(plateau, plateauBase, tabDeplacement, touche, &(*posJoX), &(*posJoY),
            &(*nbDeplacement));
   if (touche == RELOAD) {
@@ -236,6 +242,10 @@ void jeu(char touche, t_plateau plateau, t_plateau plateauBase,
     annuler_deplacement(plateau, plateauBase, tabDeplacement, &(*posJoX),
                         &(*posJoY), &(*nbDeplacement));
   }
+  if ((touche == AFF_TAB) && afficherTab == FAUX){
+    afficherTab = VRAI;
+  }
+  
   if ((touche == ZOOM) && (*niveauZoom < MAX_ZOOM)) {
     *niveauZoom += 1;
   }
@@ -481,7 +491,6 @@ void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
                            int leDeplacement, int nbDeplacement) {
   char caracDeplacement;
   if (leDeplacement == AVEC_CAISSE) {
-    // printf("avec caisse");
     if (touche == HAUT) {
       caracDeplacement = HAUT_AVEC_CAISSE;
     } else if (touche == BAS) {
@@ -493,7 +502,6 @@ void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
     }
 
   } else if (leDeplacement == SANS_CAISSE) {
-    // printf("sans caisse");
     if (touche == HAUT) {
       caracDeplacement = HAUT_SANS_CAISSE;
     } else if (touche == BAS) {
@@ -524,40 +532,43 @@ void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
 void annuler_deplacement(t_plateau plateau, t_plateau plateauBase,
                          t_tabDeplacement tabDeplacement, int *posJoX,
                          int *posJoY, int *nbDeplacement) {
+  char unCaracDuTab;
   // faire le remplacement correcte des elememts
   if (*nbDeplacement > 0) {
-    if (tabDeplacement[*nbDeplacement - 1] == HAUT_SANS_CAISSE) {
+
+    unCaracDuTab = tabDeplacement[*nbDeplacement - 1];
+    if (unCaracDuTab == HAUT_SANS_CAISSE) {
       remplace_caractere(plateau, plateauBase, *posJoX, *posJoY);
       plateau[*posJoX + 1][*posJoY] = JOUEUR;
       *posJoX += 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == BAS_SANS_CAISSE) {
+    } else if (unCaracDuTab == BAS_SANS_CAISSE) {
       remplace_caractere(plateau, plateauBase, *posJoX, *posJoY);
       plateau[*posJoX - 1][*posJoY] = JOUEUR;
       *posJoX -= 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == GAUCHE_SANS_CAISSE) {
+    } else if (unCaracDuTab == GAUCHE_SANS_CAISSE) {
       remplace_caractere(plateau, plateauBase, *posJoX, *posJoY);
       plateau[*posJoX][*posJoY + 1] = JOUEUR;
       *posJoY += 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == DROITE_SANS_CAISSE) {
+    } else if (unCaracDuTab == DROITE_SANS_CAISSE) {
       remplace_caractere(plateau, plateauBase, *posJoX, *posJoY);
       plateau[*posJoX][*posJoY - 1] = JOUEUR;
       *posJoY -= 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == HAUT_AVEC_CAISSE) {
+    } else if (unCaracDuTab == HAUT_AVEC_CAISSE) {
       plateau[*posJoX][*posJoY] = CAISSE;
       plateau[*posJoX + 1][*posJoY] = JOUEUR;
       remplace_caractere(plateau, plateauBase, *posJoX - 1, *posJoY);
       *posJoX += 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == BAS_AVEC_CAISSE) {
+    } else if (unCaracDuTab == BAS_AVEC_CAISSE) {
       plateau[*posJoX][*posJoY] = CAISSE;
       plateau[*posJoX - 1][*posJoY] = JOUEUR;
       remplace_caractere(plateau, plateauBase, *posJoX + 1, *posJoY);
       *posJoX -= 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == GAUCHE_AVEC_CAISSE) {
+    } else if (unCaracDuTab == GAUCHE_AVEC_CAISSE) {
       plateau[*posJoX][*posJoY] = CAISSE;
       plateau[*posJoX][*posJoY + 1] = JOUEUR;
       remplace_caractere(plateau, plateauBase, *posJoX, *posJoY - 1);
       *posJoY += 1;
-    } else if (tabDeplacement[*nbDeplacement - 1] == DROITE_AVEC_CAISSE) {
+    } else if (unCaracDuTab == DROITE_AVEC_CAISSE) {
       plateau[*posJoX][*posJoY] = CAISSE;
       plateau[*posJoX][*posJoY - 1] = JOUEUR;
       remplace_caractere(plateau, plateauBase, *posJoX, *posJoY + 1);
@@ -843,6 +854,6 @@ void affiche_erreur() {
   printf(RED "nombre de déplacement trop grand : fatal error \n" RESET);
 }
 
-// Copyright (c) 2025 Titouan Moquet 
+// Copyright (c) 2025 Titouan Moquet
 // MIT License
 // 1D2 IUT Lannion 2025-2026

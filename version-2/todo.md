@@ -7,3 +7,4 @@
 - [ ] optimiser sauvegarde_jeu()
 - [ ] raccourcir deplacer() ( memo dep)
 - [ ] afficher ou non le tab de déplacements 
+- [ ] proposer l'enregistrements des déplacements si gagné 

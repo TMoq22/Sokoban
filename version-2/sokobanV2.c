@@ -3,7 +3,7 @@
  * @brief jeu du Sokoban en C
  * @author Titouan Moquet
  * @version V2.3.2
- * @date 22/11/2025
+ * @date 23/11/2025
  *
  * Jeu du Sokoban réalisé en C jouable dans le terminal dans le cadre de la
  * SAE 1.01, IUT Lannion Info 1D2 2025-2026
@@ -245,7 +245,7 @@ void jeu(char touche, t_plateau plateau, t_plateau plateauBase,
   if ((touche == AFF_TAB) && afficherTab == FAUX){
     afficherTab = VRAI;
   }
-  
+
   if ((touche == ZOOM) && (*niveauZoom < MAX_ZOOM)) {
     *niveauZoom += 1;
   }

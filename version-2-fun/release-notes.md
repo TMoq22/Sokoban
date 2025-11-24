@@ -17,6 +17,8 @@ Mise à jour du Sokoban
 - suppr affichage du tab de déplacements
 - enregistremement meme si gagner
 
+- add gif (beta)
+
 
 
 ## Version V2.3.3

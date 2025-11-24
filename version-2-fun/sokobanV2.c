@@ -132,6 +132,8 @@ void affiche_tab_dep(t_tabDeplacement tabDeplacement, int nbDeplacement);
 void rejouer(char *touche, char *jouer, bool gagner);
 void affiche_erreur();
 char get_touche_y_n();
+void afficher_frame(const char *nomFichier);
+void afficher_animation();
 
 /**
  * @brief Entrée du programme
@@ -192,6 +194,7 @@ int main() {
     }
   }
   printf(BOLD YELLOW "\n\nAu revoir !\n" RESET);
+  afficher_animation();
   return EXIT_SUCCESS;
 }
 
@@ -372,7 +375,7 @@ void sauvegarde_jeu(t_plateau plateau) {
     printf(BOLD YELLOW
            "\nnom du fichier (30 caractères max) sans extention : " RESET);
     scanf("%s", nomSauvegarde);
-    strcat(nomSauvegarde,FICHIER_SOK);
+    strcat(nomSauvegarde, FICHIER_SOK);
     enregistrer_partie(plateau, nomSauvegarde);
     printf(ORANGE "Partie sauvegardé dans le fichier : %s !\n" RESET,
            nomSauvegarde);
@@ -381,7 +384,7 @@ void sauvegarde_jeu(t_plateau plateau) {
 /**
  * @brief Procédure pour le  déplacement du personnage et des caisses.
  * @param tabDeplacement type t_tabDeplacement, tableau des déplacements
- * @param nbDeplacement de type int 
+ * @param nbDeplacement de type int
  *
  */
 void sauvegarde_deplacements(t_tabDeplacement tabDeplacement,
@@ -395,7 +398,7 @@ void sauvegarde_deplacements(t_tabDeplacement tabDeplacement,
     printf(BOLD YELLOW
            "\nnom du fichier (30 caractères max) sans extention : " RESET);
     scanf("%s", nomSauvegarde);
-    strcat(nomSauvegarde,FICHIER_DEP);
+    strcat(nomSauvegarde, FICHIER_DEP);
     enregistrerDeplacements(tabDeplacement, nbDeplacement, nomSauvegarde);
     printf(ORANGE "Déplacements sauvegardé dans le fichier : %s !\n" RESET,
            nomSauvegarde);
@@ -835,3 +838,29 @@ void affiche_erreur() {
 // Copyright (c) 2025 Titouan Moquet
 // MIT License
 // 1D2 IUT Lannion 2025-2026
+
+void afficher_frame(const char *nomFichier) {
+  FILE *f = fopen(nomFichier, "r");
+  if (!f) {
+    printf("Erreur : impossible d’ouvrir %s\n", nomFichier);
+    return;
+  }
+  char ligne[256];
+  while (fgets(ligne, sizeof(ligne), f)) {
+    printf("%s", ligne);
+  }
+  fclose(f);
+}
+
+void afficher_animation() {
+  char nomFichier[64];
+  for (int z = 0; z < 10; z++) {
+
+    for (int i = 1; i <= 5; i++) {
+      snprintf(nomFichier, sizeof(nomFichier), "frames/f%d", i);
+      system("clear");
+      afficher_frame(nomFichier);
+      usleep(150000);
+    }
+  }
+}

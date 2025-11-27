@@ -2,8 +2,8 @@
  * @file sokoban.c
  * @brief jeu du Sokoban en C
  * @author Titouan Moquet
- * @version V2.3.4
- * @date 24/11/2025
+ * @version V2.3.5
+ * @date 27/11/2025
  *
  * Jeu du Sokoban réalisé en C jouable dans le terminal dans le cadre de la
  * SAE 1.01, IUT Lannion Info 1D2 2025-2026
@@ -107,7 +107,8 @@ void affiche_plateau(t_plateau plateau, int niveauZoom);
 void affiche_plateau_largeur(t_plateau plateau, int niveauZoom, int longueur);
 void affiche_debut();
 void affichage_complet(t_plateau plateau, t_tabDeplacement tabDeplacement,
-                       char nomNiveau[], int nbDeplacement, int niveauZoom);
+                       char nomNiveau[], int nbDeplacement, int niveauZoom,
+                       bool error_pos_jo);
 void recherche_pos_jo(t_plateau plateau, int *posJoX, int *posJoY);
 void deplacer(t_plateau plateau, t_plateau plateauBase,
               t_tabDeplacement tabDeplacement, char touche, int *posJoX,
@@ -125,7 +126,8 @@ void affiche_abandon();
 void affiche_niveau();
 void jeu(char touche, t_plateau plateau, t_plateau plateauBase,
          t_tabDeplacement tabDeplacement, int *posJoX, int *posJoY,
-         int *nbDeplacement, char nomNiveau[], int *niveauZoom, bool gagner);
+         int *nbDeplacement, char nomNiveau[], int *niveauZoom, bool gagner,
+         bool error_pos_jo);
 void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
                            int leDeplacement, int nbDeplacement);
 void affiche_tab_dep(t_tabDeplacement tabDeplacement, int nbDeplacement);
@@ -145,7 +147,7 @@ int main() {
   int posJoX, posJoY, nbDeplacement, niveauZoom = 1, comparaison;
   char nomNiveau[20], touche, jouer = YES;
   // Initialisation des donnees
-  bool gagner = FAUX;
+  bool gagner = FAUX, error_pos_jo = FAUX;
   touche = TOUCHE_NULL;
   posJoX = 0;
   posJoY = 0;
@@ -163,6 +165,9 @@ int main() {
       charger_partie(plateau, nomNiveau);
       charger_partie(plateauBase, nomNiveau);
       recherche_pos_jo(plateau, &posJoX, &posJoY);
+      if ((posJoX == -1) || (posJoY == -1)) {
+        error_pos_jo = VRAI;
+      }
       gagner = gagne(plateau, plateauBase);
     }
     while ((touche != FIN) && (gagner == FAUX) &&
@@ -170,10 +175,10 @@ int main() {
       if (kbhit()) {
         touche = getchar();
         jeu(touche, plateau, plateauBase, tabDeplacement, &posJoX, &posJoY,
-            &nbDeplacement, nomNiveau, &niveauZoom, gagner);
+            &nbDeplacement, nomNiveau, &niveauZoom, gagner, error_pos_jo);
         gagner = gagne(plateau, plateauBase);
         affichage_complet(plateau, tabDeplacement, nomNiveau, nbDeplacement,
-                          niveauZoom);
+                          niveauZoom, error_pos_jo);
       }
       if (touche == FIN) {
         sauvegarde_jeu(plateau);
@@ -226,7 +231,8 @@ void rejouer(char *touche, char *jouer, bool gagner) {
  */
 void jeu(char touche, t_plateau plateau, t_plateau plateauBase,
          t_tabDeplacement tabDeplacement, int *posJoX, int *posJoY,
-         int *nbDeplacement, char nomNiveau[], int *niveauZoom, bool gagner) {
+         int *nbDeplacement, char nomNiveau[], int *niveauZoom, bool gagner,
+         bool error_pos_jo) {
 
   deplacer(plateau, plateauBase, tabDeplacement, touche, &(*posJoX), &(*posJoY),
            &(*nbDeplacement));
@@ -235,7 +241,8 @@ void jeu(char touche, t_plateau plateau, t_plateau plateauBase,
     recherche_pos_jo(plateau, &(*posJoX), &(*posJoY));
     *nbDeplacement = 0;
     affichage_complet(plateau, tabDeplacement, nomNiveau, *nbDeplacement,
-                      *niveauZoom);
+                      *niveauZoom, error_pos_jo);
+    error_pos_jo = FAUX;
   }
   if (touche == UNDO) {
     annuler_deplacement(plateau, plateauBase, tabDeplacement, &(*posJoX),
@@ -372,7 +379,7 @@ void sauvegarde_jeu(t_plateau plateau) {
     printf(BOLD YELLOW
            "\nnom du fichier (30 caractères max) sans extention : " RESET);
     scanf("%s", nomSauvegarde);
-    strcat(nomSauvegarde,FICHIER_SOK);
+    strcat(nomSauvegarde, FICHIER_SOK);
     enregistrer_partie(plateau, nomSauvegarde);
     printf(ORANGE "Partie sauvegardé dans le fichier : %s !\n" RESET,
            nomSauvegarde);
@@ -381,7 +388,7 @@ void sauvegarde_jeu(t_plateau plateau) {
 /**
  * @brief Procédure pour le  déplacement du personnage et des caisses.
  * @param tabDeplacement type t_tabDeplacement, tableau des déplacements
- * @param nbDeplacement de type int 
+ * @param nbDeplacement de type int
  *
  */
 void sauvegarde_deplacements(t_tabDeplacement tabDeplacement,
@@ -395,7 +402,7 @@ void sauvegarde_deplacements(t_tabDeplacement tabDeplacement,
     printf(BOLD YELLOW
            "\nnom du fichier (30 caractères max) sans extention : " RESET);
     scanf("%s", nomSauvegarde);
-    strcat(nomSauvegarde,FICHIER_DEP);
+    strcat(nomSauvegarde, FICHIER_DEP);
     enregistrerDeplacements(tabDeplacement, nbDeplacement, nomSauvegarde);
     printf(ORANGE "Déplacements sauvegardé dans le fichier : %s !\n" RESET,
            nomSauvegarde);
@@ -475,7 +482,7 @@ void deplacer(t_plateau plateau, t_plateau plateauBase,
 
 void deplacer_joueur(t_plateau plateau, t_plateau plateauBase, int directionX,
                      int directionY) {
-  if (plateauBase[directionX][directionY] == CIBLE) {
+  if (plateauBase[directionX][directionY] == CIBLE || plateauBase[directionX][directionY] == OBJECTIF) {
     plateau[directionX][directionY] = JOUEUR_SUR_CIBLE;
   } else {
     plateau[directionX][directionY] = JOUEUR;
@@ -546,7 +553,12 @@ void annuler_deplacement(t_plateau plateau, t_plateau plateauBase,
                       dep == GAUCHE_AVEC_CAISSE || dep == DROITE_AVEC_CAISSE);
     remplace_caractere(plateau, plateauBase, *posJoX, *posJoY);
     if (avecCaisse) {
-      plateau[*posJoX][*posJoY] = CAISSE;
+      if ((plateauBase[*posJoX][*posJoY] == CIBLE) ||
+          (plateauBase[*posJoX][*posJoY] == OBJECTIF)) {
+        plateau[*posJoX][*posJoY] = OBJECTIF;
+      } else {
+        plateau[*posJoX][*posJoY] = CAISSE;
+      }
       remplace_caractere(plateau, plateauBase, *posJoX - dx, *posJoY - dy);
     }
     *posJoX += dx;
@@ -565,16 +577,19 @@ void annuler_deplacement(t_plateau plateau, t_plateau plateauBase,
  * en entrer et sortie
  */
 void recherche_pos_jo(t_plateau plateau, int *posJoX, int *posJoY) {
-  /* pour chercher et ensuite récuperer les coordonnées du caractere*/
   for (int longueur = 0; longueur < TAILLE; longueur++) {
     for (int largeur = 0; largeur < TAILLE; largeur++) {
       if ((plateau[longueur][largeur] == JOUEUR) ||
           (plateau[longueur][largeur] == JOUEUR_SUR_CIBLE)) {
         *posJoX = longueur;
         *posJoY = largeur;
-        return;
+        // return;
       }
     }
+  }
+  if ((*posJoX == 0) || (*posJoY == 0)) {
+    *posJoX = -1;
+    *posJoY = -1;
   }
 }
 
@@ -706,7 +721,6 @@ void affiche_plateau_largeur(t_plateau plateau, int niveauZoom, int longueur) {
   int zoomc;
   for (largeur = 0; largeur < TAILLE; largeur++) {
     for (zoomc = 0; zoomc < niveauZoom; zoomc++) {
-
       if (plateau[longueur][largeur] == JOUEUR) {
         printf(RED "%c" RESET, JOUEUR);
       } else if (plateau[longueur][largeur] == OBJECTIF) {
@@ -721,6 +735,7 @@ void affiche_plateau_largeur(t_plateau plateau, int niveauZoom, int longueur) {
       } else {
         printf("%c", plateau[longueur][largeur]);
       }
+      
     }
   }
 }
@@ -732,10 +747,15 @@ void affiche_plateau_largeur(t_plateau plateau, int niveauZoom, int longueur) {
  * @param nbDeplacement entier, nombre de déplacement du joueur.
  */
 void affichage_complet(t_plateau plateau, t_tabDeplacement tabDeplacement,
-                       char nomNiveau[], int nbDeplacement, int niveauZoom) {
+                       char nomNiveau[], int nbDeplacement, int niveauZoom,
+                       bool error_pos_jo) {
   system("clear");
 
   afficher_entete(nbDeplacement, nomNiveau);
+  if (error_pos_jo) {
+    printf(RED "Erreur sur la position du joueur veuillez quitter et vérifier "
+               "le niveau !\n\n " RESET);
+  }
   affiche_plateau(plateau, niveauZoom);
   affiche_tab_dep(tabDeplacement, nbDeplacement);
 }

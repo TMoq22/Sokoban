@@ -11,7 +11,12 @@ Mise à jour du Sokoban
 
 -->
 
-## Version V2.3.4
+## Version 2.3.5
+- fix bug disparition cible après déplacement et undo 
+- ajout d'un message d'erreur si aucun joueur n'est trouver au début de la partie 
+- update readme
+
+## Version 2.3.4
 - modification deplacer(), jeu(), sauvegarde_jeu(),  memoriser_deplacement(), annuler_deplacement()
 - creation de get_touche_y_n(), sauvegarde_deplacements(), deplacer_joueur()
 - suppr affichage du tab de déplacements
@@ -19,14 +24,14 @@ Mise à jour du Sokoban
 
 
 
-## Version V2.3.3
+## Version 2.3.3
 - ajout procedure enrigistrer déplacements 
 - modification des méssages de fin de partie 
 - ajout de couleurs sur d'autres textes 
 - commentaire sur certaines procedures 
 
 
-## Version V2.3.2 
+## Version 2.3.2 
 - modification du main :
   - création d'une procédure "rejouer" pour alléger la main.
   - création d'une procédure "affiche" erreur qui affiche un message d'erreur si le nombre de déplacements est trop grand.
@@ -37,7 +42,7 @@ Mise à jour du Sokoban
 
 
 
-## Version V2.3.1
+## Version 2.3.1
 
 - Correction du problème de suppression des cibles lors de l'undo avec caisse
 - modification de la procedure remplace_carac_deplacement
@@ -45,7 +50,7 @@ Mise à jour du Sokoban
   - modification des noms de variables 
   
 
-## Version V2.3.0
+## Version 2.3.0
 - Correction du problème de suppression des cibles lors de l'undo sans caisse
 - fix affichage du tableau de débug des déplacements 
 

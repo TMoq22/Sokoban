@@ -2,7 +2,7 @@
  * @file sokoban.c
  * @brief jeu du Sokoban en C
  * @author Titouan Moquet
- * @version V2.3.5
+ * @version V2.3.6
  * @date 27/11/2025
  *
  * Jeu du Sokoban réalisé en C jouable dans le terminal dans le cadre de la
@@ -146,7 +146,7 @@ int main() {
   t_tabDeplacement tabDeplacement;
   int posJoX, posJoY, nbDeplacement, niveauZoom = 1, comparaison;
   char nomNiveau[20], touche, jouer = YES;
-  // Initialisation des donnees
+  // Initialisation des données
   bool gagner = FAUX, error_pos_jo = FAUX;
   touche = TOUCHE_NULL;
   posJoX = 0;
@@ -157,21 +157,23 @@ int main() {
     nbDeplacement = 0;
     affiche_debut();
     scanf("%s", nomNiveau);
-    // fonction exit avant meme de rentrer dans le prog
     comparaison = strcmp(nomNiveau, QUITTER);
     if (comparaison != 0) {
-      // deux plateau 1 pour le jeu et un pour la sauvegarde des élements de
-      // base
+      // deux plateau, 1 pour le jeu et 1 pour la sauvegarde des élèments
       charger_partie(plateau, nomNiveau);
       charger_partie(plateauBase, nomNiveau);
       recherche_pos_jo(plateau, &posJoX, &posJoY);
       if ((posJoX == -1) || (posJoY == -1)) {
         error_pos_jo = VRAI;
+        printf(
+            RED
+            "Erreur sur la position du joueur vérifiez le niveau !\n\n " RESET);
       }
-      gagner = gagne(plateau, plateauBase);
     }
+    gagner = gagne(plateau, plateauBase);
+
     while ((touche != FIN) && (gagner == FAUX) &&
-           (nbDeplacement < TAILLE_DEPLACEMENT) && comparaison != 0) {
+           (nbDeplacement < TAILLE_DEPLACEMENT) && (error_pos_jo == FAUX)) {
       if (kbhit()) {
         touche = getchar();
         jeu(touche, plateau, plateauBase, tabDeplacement, &posJoX, &posJoY,
@@ -184,17 +186,19 @@ int main() {
         sauvegarde_jeu(plateau);
       }
     }
+    if (nbDeplacement >= TAILLE_DEPLACEMENT) {
+      affiche_erreur();
+    }
     if (gagner == VRAI) {
       system("clear");
       affiche_plateau(plateau, niveauZoom);
       affiche_message_fin(nbDeplacement);
     }
-    sauvegarde_deplacements(tabDeplacement, nbDeplacement);
+    if ((comparaison != 0) && (error_pos_jo == FAUX)) {
+      sauvegarde_deplacements(tabDeplacement, nbDeplacement);
+    }
     rejouer(&touche, &jouer, gagner);
     gagner = FAUX;
-    if (nbDeplacement >= TAILLE_DEPLACEMENT) {
-      affiche_erreur();
-    }
   }
   printf(BOLD YELLOW "\n\nAu revoir !\n" RESET);
   return EXIT_SUCCESS;
@@ -353,6 +357,11 @@ void enregistrerDeplacements(t_tabDeplacement t, int nb, char fic[]) {
   fclose(f);
 }
 
+/**
+ * @brief Focntion qui renvoie soit y si la touche y est préssé ou n si la
+ * touche n est préssé
+ * @return toucheS le caractère de la touche
+ * */
 char get_touche_y_n() {
   char toucheS = TOUCHE_NULL;
   while ((toucheS != NO) && (toucheS != YES)) {
@@ -482,7 +491,8 @@ void deplacer(t_plateau plateau, t_plateau plateauBase,
 
 void deplacer_joueur(t_plateau plateau, t_plateau plateauBase, int directionX,
                      int directionY) {
-  if (plateauBase[directionX][directionY] == CIBLE || plateauBase[directionX][directionY] == OBJECTIF) {
+  if (plateauBase[directionX][directionY] == CIBLE ||
+      plateauBase[directionX][directionY] == OBJECTIF) {
     plateau[directionX][directionY] = JOUEUR_SUR_CIBLE;
   } else {
     plateau[directionX][directionY] = JOUEUR;
@@ -701,13 +711,13 @@ void afficher_entete(int nbDeplacement, char nomNiveau[]) {
 
 /**
  * @brief Procédure qui affiche le plateau de jeu,
- * remplace certains caratère par d'autre à l'affichage : ex '+' -> '@'.
+ * remplace certains caratère, par d'autre à l'affichage : ex '+' -> '@'.
  * @param plateau de type t_plateau, tableau de jeu.
+ * @param niveauZoom int, niveau du zoom
  */
 void affiche_plateau(t_plateau plateau, int niveauZoom) {
   int longueur;
   int zooml;
-
   for (longueur = 0; longueur < TAILLE; longueur++) {
     for (zooml = 0; zooml < niveauZoom; zooml++) {
       affiche_plateau_largeur(plateau, niveauZoom, longueur);
@@ -716,6 +726,12 @@ void affiche_plateau(t_plateau plateau, int niveauZoom) {
   }
 }
 
+/**
+ * @brief Procédure qui affiche le plateau de jeu,
+ * remplace certains caratère par d'autre à l'affichage : ex '+' -> '@'.
+ * @param plateau de type t_plateau, tableau de jeu.
+ * @param niveauZoom int, niveau du zoom
+ */
 void affiche_plateau_largeur(t_plateau plateau, int niveauZoom, int longueur) {
   int largeur;
   int zoomc;
@@ -735,7 +751,6 @@ void affiche_plateau_largeur(t_plateau plateau, int niveauZoom, int longueur) {
       } else {
         printf("%c", plateau[longueur][largeur]);
       }
-      
     }
   }
 }
@@ -752,12 +767,8 @@ void affichage_complet(t_plateau plateau, t_tabDeplacement tabDeplacement,
   system("clear");
 
   afficher_entete(nbDeplacement, nomNiveau);
-  if (error_pos_jo) {
-    printf(RED "Erreur sur la position du joueur veuillez quitter et vérifier "
-               "le niveau !\n\n " RESET);
-  }
   affiche_plateau(plateau, niveauZoom);
-  affiche_tab_dep(tabDeplacement, nbDeplacement);
+  // affiche_tab_dep(tabDeplacement, nbDeplacement);
 }
 
 /**
@@ -786,7 +797,7 @@ void affiche_message_fin(int nbDeplacement) {
 }
 
 /**
- * @brief Procédure qui affiche un message en cas  d'abandon
+ * @brief Procédure qui affiche un message en cas d'abandon
  */
 void affiche_abandon() {
   system("clear");

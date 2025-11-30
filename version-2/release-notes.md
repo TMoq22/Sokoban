@@ -11,6 +11,10 @@ Mise à jour du Sokoban
 
 -->
 
+## Version 2.3.6 
+- fix bug 
+- 
+
 ## Version 2.3.5
 - fix bug disparition cible après déplacement et undo 
 - ajout d'un message d'erreur si aucun joueur n'est trouver au début de la partie 

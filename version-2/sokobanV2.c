@@ -2,8 +2,8 @@
  * @file sokoban.c
  * @brief jeu du Sokoban en C
  * @author Titouan Moquet
- * @version V2.3.6
- * @date 27/11/2025
+ * @version V2.3.7
+ * @date 30/11/2025
  *
  * Jeu du Sokoban réalisé en C jouable dans le terminal dans le cadre de la
  * SAE 1.01, IUT Lannion Info 1D2 2025-2026
@@ -95,41 +95,47 @@ const char FICHIER_DEP[] = ".dep";
 
 // Les prototypes des fonctions et procédures, détaille avant chaque fonction
 // et procédures.
+
 int kbhit();
+void init_game(t_plateau plateau, t_plateau plateauBase, char *jouer,
+  int *nbDeplacement, char nomNiveau[], int *comparaison,
+  int *posJoX, int *posJoY, bool errorPosJo, bool *gagner);
+bool verif_peu_jouer(char touche, bool gagner, 
+  int nbDeplacement, bool errorPosJo,int notExit);
 void charger_partie(t_plateau plateau, char fichier[]);
 void enregistrer_partie(t_plateau plateau, char fichier[]);
 void sauvegarde_jeu(t_plateau plateau);
 void sauvegarde_deplacements(t_tabDeplacement tabDeplacement,
-                             int nbDeplacement);
-void enregistrerDeplacements(t_tabDeplacement t, int nb, char fic[]);
+  int nbDeplacement);
+void enregistrer_deplacements(t_tabDeplacement t, int nb, char fic[]);
 void afficher_entete(int nbDeplacement, char nomNiveau[]);
 void affiche_plateau(t_plateau plateau, int niveauZoom);
 void affiche_plateau_largeur(t_plateau plateau, int niveauZoom, int longueur);
 void affiche_debut();
 void affichage_complet(t_plateau plateau, t_tabDeplacement tabDeplacement,
-                       char nomNiveau[], int nbDeplacement, int niveauZoom,
-                       bool error_pos_jo);
+  char nomNiveau[], int nbDeplacement, int niveauZoom,
+  bool errorPosJo);
 void recherche_pos_jo(t_plateau plateau, int *posJoX, int *posJoY);
 void deplacer(t_plateau plateau, t_plateau plateauBase,
-              t_tabDeplacement tabDeplacement, char touche, int *posJoX,
-              int *posJoY, int *nbDeplacement);
+  t_tabDeplacement tabDeplacement, char touche, int *posJoX,
+  int *posJoY, int *nbDeplacement);
 void deplacer_joueur(t_plateau plateau, t_plateau plateauBase, int directionX,
-                     int directionY);
+  int directionY);
 void remplace_caractere(t_plateau tableau, t_plateau plateauBase, int posX,
-                        int posY);
+  int posY);
 void annuler_deplacement(t_plateau plateau, t_plateau plateauBase,
-                         t_tabDeplacement tabDeplacement, int *posJoX,
-                         int *posJoY, int *nbDeplacement);
+  t_tabDeplacement tabDeplacement, int *posJoX,
+  int *posJoY, int *nbDeplacement);
 bool gagne(t_plateau plateau, t_plateau plateauBase);
 void affiche_message_fin(int nbDeplacement);
 void affiche_abandon();
 void affiche_niveau();
 void jeu(char touche, t_plateau plateau, t_plateau plateauBase,
-         t_tabDeplacement tabDeplacement, int *posJoX, int *posJoY,
-         int *nbDeplacement, char nomNiveau[], int *niveauZoom, bool gagner,
-         bool error_pos_jo);
+  t_tabDeplacement tabDeplacement, int *posJoX, int *posJoY,
+  int *nbDeplacement, char nomNiveau[], int *niveauZoom, bool *gagner,
+  bool errorPosJo);
 void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
-                           int leDeplacement, int nbDeplacement);
+  int leDeplacement, int nbDeplacement);
 void affiche_tab_dep(t_tabDeplacement tabDeplacement, int nbDeplacement);
 void rejouer(char *touche, char *jouer, bool gagner);
 void affiche_erreur();
@@ -147,44 +153,30 @@ int main() {
   int posJoX, posJoY, nbDeplacement, niveauZoom = 1, comparaison;
   char nomNiveau[20], touche, jouer = YES;
   // Initialisation des données
-  bool gagner = FAUX, error_pos_jo = FAUX;
+  bool gagner = FAUX, errorPosJo = FAUX;
   touche = TOUCHE_NULL;
   posJoX = 0;
   posJoY = 0;
+  bool peuJouer;
   system("clear");
   while (jouer != NO) {
-    jouer = NO;
-    nbDeplacement = 0;
-    affiche_debut();
-    scanf("%s", nomNiveau);
-    comparaison = strcmp(nomNiveau, QUITTER);
-    if (comparaison != 0) {
-      // deux plateau, 1 pour le jeu et 1 pour la sauvegarde des élèments
-      charger_partie(plateau, nomNiveau);
-      charger_partie(plateauBase, nomNiveau);
-      recherche_pos_jo(plateau, &posJoX, &posJoY);
-      if ((posJoX == -1) || (posJoY == -1)) {
-        error_pos_jo = VRAI;
-        printf(
-            RED
-            "Erreur sur la position du joueur vérifiez le niveau !\n\n " RESET);
-      }
-    }
-    gagner = gagne(plateau, plateauBase);
-
-    while ((touche != FIN) && (gagner == FAUX) &&
-           (nbDeplacement < TAILLE_DEPLACEMENT) && (error_pos_jo == FAUX)) {
+    init_game(plateau, plateauBase, &jouer, &nbDeplacement, nomNiveau,
+      &comparaison, &posJoX, &posJoY, errorPosJo, &gagner);
+      peuJouer = verif_peu_jouer(touche, gagner, nbDeplacement, 
+      errorPosJo, comparaison);
+    while (peuJouer) {
       if (kbhit()) {
         touche = getchar();
         jeu(touche, plateau, plateauBase, tabDeplacement, &posJoX, &posJoY,
-            &nbDeplacement, nomNiveau, &niveauZoom, gagner, error_pos_jo);
-        gagner = gagne(plateau, plateauBase);
+            &nbDeplacement, nomNiveau, &niveauZoom, &gagner, errorPosJo);
         affichage_complet(plateau, tabDeplacement, nomNiveau, nbDeplacement,
-                          niveauZoom, error_pos_jo);
+          niveauZoom, errorPosJo);
       }
       if (touche == FIN) {
         sauvegarde_jeu(plateau);
       }
+      peuJouer = verif_peu_jouer(touche, gagner, nbDeplacement, 
+        errorPosJo, comparaison);
     }
     if (nbDeplacement >= TAILLE_DEPLACEMENT) {
       affiche_erreur();
@@ -194,7 +186,7 @@ int main() {
       affiche_plateau(plateau, niveauZoom);
       affiche_message_fin(nbDeplacement);
     }
-    if ((comparaison != 0) && (error_pos_jo == FAUX)) {
+    if ((comparaison != 0) && (errorPosJo == FAUX)) {
       sauvegarde_deplacements(tabDeplacement, nbDeplacement);
     }
     rejouer(&touche, &jouer, gagner);
@@ -202,6 +194,41 @@ int main() {
   }
   printf(BOLD YELLOW "\n\nAu revoir !\n" RESET);
   return EXIT_SUCCESS;
+}
+
+// ---- fonctions et procédures ----
+bool verif_peu_jouer(char touche, bool gagner, int nbDeplacement,
+  bool errorPosJo,int notExit) {
+  return ((touche != FIN) && (gagner == FAUX) &&
+  (nbDeplacement < TAILLE_DEPLACEMENT) &&
+  (errorPosJo == FAUX) && (notExit != 0));
+}
+
+/**
+ * @brief procedure pour inititaliser les variables de jeu et des plateaux
+ * utiliser pour reduire la taille du main
+ */
+void init_game(t_plateau plateau, t_plateau plateauBase, char *jouer,
+    int *nbDeplacement, char nomNiveau[], int *comparaison,
+    int *posJoX, int *posJoY, bool errorPosJo, bool *gagner) {
+  *jouer = NO;
+  *nbDeplacement = 0;
+  affiche_debut();
+  scanf("%s", nomNiveau);
+  *comparaison = strcmp(nomNiveau, QUITTER);
+  if (*comparaison != 0) {
+    // deux plateau, 1 pour le jeu et 1 pour la sauvegarde des élèments
+    charger_partie(plateau, nomNiveau);
+    charger_partie(plateauBase, nomNiveau);
+    recherche_pos_jo(plateau, &(*posJoX), &(*posJoY));
+    if ((*posJoX == -1) || (*posJoY == -1)) {
+      errorPosJo = VRAI;
+      printf( RED
+        "Erreur sur la position du joueur vérifiez le niveau !\n\n "
+      RESET);
+    }
+    *gagner = gagne(plateau, plateauBase);
+  }
 }
 
 /**
@@ -223,34 +250,34 @@ void rejouer(char *touche, char *jouer, bool gagner) {
 /**
  * @brief procedure qui permet de reduire la taille du main elle sert pour
  * l'appel de déplacer, gère le reload et le zoom/dezoom
- * @param touche
- * @param plateau
- * @param plateauBase
- * @param posJoX
- * @param posJoY
- * @param nbDeplacement
- * @param nomNiveau
- * @param niveauZoom
- * @param gagner
+ * @param touche char
+ * @param plateau t_plateau
+ * @param plateauBase t-plateau
+ * @param posJoX int
+ * @param posJoY int
+ * @param nbDeplacement int
+ * @param nomNiveau char
+ * @param niveauZoom int
+ * @param gagner bool
  */
 void jeu(char touche, t_plateau plateau, t_plateau plateauBase,
-         t_tabDeplacement tabDeplacement, int *posJoX, int *posJoY,
-         int *nbDeplacement, char nomNiveau[], int *niveauZoom, bool gagner,
-         bool error_pos_jo) {
+  t_tabDeplacement tabDeplacement, int *posJoX, int *posJoY,
+  int *nbDeplacement, char nomNiveau[], int *niveauZoom, bool *gagner,
+  bool errorPosJo) {
 
-  deplacer(plateau, plateauBase, tabDeplacement, touche, &(*posJoX), &(*posJoY),
-           &(*nbDeplacement));
+  deplacer(plateau, plateauBase, tabDeplacement, touche, &(*posJoX),
+   &(*posJoY), &(*nbDeplacement));
   if (touche == RELOAD) {
     charger_partie(plateau, nomNiveau);
     recherche_pos_jo(plateau, &(*posJoX), &(*posJoY));
     *nbDeplacement = 0;
     affichage_complet(plateau, tabDeplacement, nomNiveau, *nbDeplacement,
-                      *niveauZoom, error_pos_jo);
-    error_pos_jo = FAUX;
+                      *niveauZoom, errorPosJo);
+    errorPosJo = FAUX;
   }
   if (touche == UNDO) {
     annuler_deplacement(plateau, plateauBase, tabDeplacement, &(*posJoX),
-                        &(*posJoY), &(*nbDeplacement));
+      &(*posJoY), &(*nbDeplacement));
   }
   if ((touche == ZOOM) && (*niveauZoom < MAX_ZOOM)) {
     *niveauZoom += 1;
@@ -258,9 +285,8 @@ void jeu(char touche, t_plateau plateau, t_plateau plateauBase,
   if ((touche == DEZOOM) && (*niveauZoom > MIN_ZOOM)) {
     *niveauZoom -= 1;
   }
+  *gagner = gagne(plateau, plateauBase);
 }
-
-// ---- fonctions et procedures ----
 
 /**
  * @brief fonction qui permet la lecture d’une touche au clavier sans écho
@@ -349,7 +375,7 @@ void enregistrer_partie(t_plateau plateau, char fichier[]) {
  * @param nb int , nb déplacements
  * @param fic string , nom du fichier
  */
-void enregistrerDeplacements(t_tabDeplacement t, int nb, char fic[]) {
+void enregistrer_deplacements(t_tabDeplacement t, int nb, char fic[]) {
   FILE *f;
 
   f = fopen(fic, "w");
@@ -401,7 +427,7 @@ void sauvegarde_jeu(t_plateau plateau) {
  *
  */
 void sauvegarde_deplacements(t_tabDeplacement tabDeplacement,
-                             int nbDeplacement) {
+    int nbDeplacement) {
   char nomSauvegarde[40];
   char toucheS = TOUCHE_NULL; // carac vide
   printf(BOLD YELLOW "\nVoulez vous sauvegarder la liste de vos déplacements ? "
@@ -412,7 +438,7 @@ void sauvegarde_deplacements(t_tabDeplacement tabDeplacement,
            "\nnom du fichier (30 caractères max) sans extention : " RESET);
     scanf("%s", nomSauvegarde);
     strcat(nomSauvegarde, FICHIER_DEP);
-    enregistrerDeplacements(tabDeplacement, nbDeplacement, nomSauvegarde);
+    enregistrer_deplacements(tabDeplacement, nbDeplacement, nomSauvegarde);
     printf(ORANGE "Déplacements sauvegardé dans le fichier : %s !\n" RESET,
            nomSauvegarde);
   }
@@ -433,8 +459,8 @@ void sauvegarde_deplacements(t_tabDeplacement tabDeplacement,
  * effectué, en entrer et sortie
  */
 void deplacer(t_plateau plateau, t_plateau plateauBase,
-              t_tabDeplacement tabDeplacement, char touche, int *posJoX,
-              int *posJoY, int *nbDeplacement) {
+    t_tabDeplacement tabDeplacement, char touche, int *posJoX,
+    int *posJoY, int *nbDeplacement) {
   int directionX = 0, directionY = 0;
   int x = *posJoX, y = *posJoY;
   int leDeplacement = PAS_DEPLACEMENT;
@@ -490,7 +516,7 @@ void deplacer(t_plateau plateau, t_plateau plateauBase,
 }
 
 void deplacer_joueur(t_plateau plateau, t_plateau plateauBase, int directionX,
-                     int directionY) {
+    int directionY) {
   if (plateauBase[directionX][directionY] == CIBLE ||
       plateauBase[directionX][directionY] == OBJECTIF) {
     plateau[directionX][directionY] = JOUEUR_SUR_CIBLE;
@@ -508,7 +534,7 @@ void deplacer_joueur(t_plateau plateau, t_plateau plateauBase, int directionX,
  * @param nbDeplacement int, pour l'insertion des déplacements
  */
 void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
-                           int leDeplacement, int nbDeplacement) {
+    int leDeplacement, int nbDeplacement) {
   char caracDeplacement = TOUCHE_NULL;
   if (leDeplacement == PAS_DEPLACEMENT) {
     leDeplacement = SANS_CAISSE;
@@ -546,8 +572,8 @@ void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
  * @param nbDeplacement int, nombre de déplacements du joueur
  */
 void annuler_deplacement(t_plateau plateau, t_plateau plateauBase,
-                         t_tabDeplacement tabDeplacement, int *posJoX,
-                         int *posJoY, int *nbDeplacement) {
+    t_tabDeplacement tabDeplacement, int *posJoX,
+    int *posJoY, int *nbDeplacement) {
   char dep = tabDeplacement[*nbDeplacement - 1];
   int dx = 0, dy = 0;
   if (*nbDeplacement > 0) {
@@ -615,7 +641,7 @@ void recherche_pos_jo(t_plateau plateau, int *posJoX, int *posJoY) {
  * en entrer et sortie
  */
 void remplace_caractere(t_plateau plateau, t_plateau plateauBase, int posX,
-                        int posY) {
+    int posY) {
   // remplace le caractère à cette position par un point si il y a un point à
   // la base
 
@@ -762,8 +788,8 @@ void affiche_plateau_largeur(t_plateau plateau, int niveauZoom, int longueur) {
  * @param nbDeplacement entier, nombre de déplacement du joueur.
  */
 void affichage_complet(t_plateau plateau, t_tabDeplacement tabDeplacement,
-                       char nomNiveau[], int nbDeplacement, int niveauZoom,
-                       bool error_pos_jo) {
+    char nomNiveau[], int nbDeplacement, int niveauZoom,
+    bool errorPosJo) {
   system("clear");
 
   afficher_entete(nbDeplacement, nomNiveau);

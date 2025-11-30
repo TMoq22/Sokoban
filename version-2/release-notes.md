@@ -11,9 +11,14 @@ Mise à jour du Sokoban
 
 -->
 
+## Version 2.3.7
+- ajout procedure : init_game()
+- ajout fonction : verif_peu_jouer()
+- main() raccourcis
+- correction diverses 
+
 ## Version 2.3.6 
 - fix bug 
-- 
 
 ## Version 2.3.5
 - fix bug disparition cible après déplacement et undo 

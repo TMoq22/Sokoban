@@ -65,9 +65,18 @@ Le programme affiche la liste des fichiers .sok disponibles, puis demande le niv
 
 Entrer un niveau : niveau1.sok
 
+<img width="715" height="253" alt="Capture d’écran du 2025-12-01 10-45-24" src="https://github.com/user-attachments/assets/4e389109-70de-4ed9-9783-8b53f0958e79" />
+
 
 ---
-## Limitations connues
+
+## ✨ Aperçu 
+<img width="348" height="502" alt="image" src="https://github.com/user-attachments/assets/77e127cb-7024-44bb-b1af-7cf0c6bd46a3" />
+<img width="348" height="502" alt="image" src="https://github.com/user-attachments/assets/8afadedc-9202-4ed0-a7ca-d202e1ffd717" />
+<img width="348" height="502" alt="image" src="https://github.com/user-attachments/assets/a3d7ec40-81ae-4fc6-8f6d-dab6e4662185" />
+
+---
+## ⚠️ Limitations connues
 - Plateau fixe de 12×12 cases
 - Historique limité à 5000 déplacements 
 - Nécessite un terminal unix compatible ANSI
@@ -82,4 +91,11 @@ Projet sous licence MIT — libre d’utilisation, modification et redistributio
 
 Titouan Moquet
 BUT Informatique,   
-Promo 2025–2026 IUT de Lannion
+Promo 2025–2026 IUT de Lannion  
+<img width="114" height="37" alt="image" src="https://github.com/user-attachments/assets/59097d28-f71c-4109-a4bb-8964ddbde6bd" />
+
+---
+<div align="center">
+  
+ **Bon jeu ! 🎮** 
+</div>

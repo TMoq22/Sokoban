@@ -1,33 +1,33 @@
-# Sokoban 
-
+# Sokoban  
 
 <div align="center">
 
 ![Sokoban](https://img.shields.io/badge/Jeu-Sokoban-blue?style=for-the-badge)
-![Langage](https://img.shields.io/badge/Langage-C-00599C?style=for-the-badge&logo=c)
+![Langage](https://img.shields.io/badge/Language-C-00599C?style=for-the-badge&logo=c)
 ![Terminal](https://img.shields.io/badge/Interface-Terminal-black?style=for-the-badge)
 ![Version](https://img.shields.io/badge/Version-2.3.7-green?style=for-the-badge)
 
-**Jeu du Sokoban réalisé en C jouable dans le terminal**
+**Jeu Sokoban réalisé en C, jouable directement dans le terminal**
 
-<!--  [🎮 Fonctionnalités](#-fonctionnalités) • [🕹️ Commandes](#️-commandes) • [🚀 Installation](#-installation) • [📖 Usage](#-usage)
--->
+[🕹️ Commandes](#-commandes) • [🚀 Installation](#-installation) • [📖 Lancer-une-partie](#-lancer-une-partie) • [🖼️ Aperçu](#-aperçu)
+
 </div>
-<!--
-<img width="378" height="483" alt="image du jeu" src="https://github.com/user-attachments/assets/7a1c55fa-0154-4056-82de-c6d4ace259de" />
--->
----
 
+---
 
 ## 📝 Description
 
-Ce projet est une implémentation complète du jeu **Sokoban**, codé en **C** et jouable directement dans le **terminal**.  
+Ce projet est une implémentation complète du **jeu Sokoban**, codée en **C** et jouable directement dans un **terminal** compatible ANSI.
 
-**Objectif du jeu :** Pousser toutes les caisses (`$`) sur les cibles (`.`) en un minimum de déplacements. Simple en apparence, mais diablement addictif !
+Il s'agit d'un projet réalisé dans le cadre de ma formation au **BUT Informatique** à l’**IUT de Lannion**.
+
+**Objectif du jeu :**  
+Déplacer le personnage pour **pousser toutes les caisses (`$`) sur les cibles (`.`)**.  
+Impossible de tirer une caisse : la stratégie est essentielle !
 
 ---
 
-## Commandes
+## 🕹️ Commandes
 
 | Touche | Action |
 |:------:|:-------|
@@ -35,35 +35,51 @@ Ce projet est une implémentation complète du jeu **Sokoban**, codé en **C** e
 | `S` | ⬇️ Descendre |
 | `Q` | ⬅️ Aller à gauche |
 | `D` | ➡️ Aller à droite |
-| `U` | ↩️ **Annuler** le dernier mouvement |
-| `+` | 🔍 **Zoom** (agrandir le plateau) |
-| `-` | 🔎 **Dézoom** (rétrécir le plateau) |
+| `U` | ↩️ Annuler le dernier mouvement |
+| `+` | 🔍 Zoomer |
+| `-` | 🔎 Dézoomer |
 | `R` | 🔄 Recommencer le niveau |
 | `X` | 🚪 Quitter (avec option de sauvegarde) |
 
+> Les touches ZQSD correspondent à la disposition AZERTY.
 
-> **Note :** Les touches ZQSD correspondent à la disposition AZERTY française.
 ---
 
-## Installation
+## 🚀 Installation
 
 ### Prérequis
-- GCC (GNU Compiler Collection)
-- Terminal Unix/Linux ou macOS
+- GCC  
+- Terminal Unix/Linux ou macOS (fonctionne aussi sur Windows via WSL)
 
 ### Compilation
 
 ```bash
-gcc sokoban(version).c -o sokoban(version)
+gcc sokoban.c -o sokoban
 ```
----
-
-## Lancer une partie
-
+## 📖 Lancer une partie
 ```bash
 ./sokoban
 ```
 
+Le programme affiche la liste des fichiers .sok disponibles, puis demande le niveau :
+
+Entrer un niveau : niveau1.sok
+
+
 ---
-Titouan Moquet Info 1D2
-IUT Lannion 2025-2026
+## Limitations connues
+- Plateau fixe de 12×12 cases
+- Historique limité à 5000 déplacements 
+- Nécessite un terminal unix compatible ANSI
+---
+## 📄 Licence
+
+Projet sous licence MIT — libre d’utilisation, modification et redistribution.  
+[Voir licence](/LICENSE)
+
+---
+### 👤 Auteur
+
+Titouan Moquet
+BUT Informatique,   
+Promo 2025–2026 IUT de Lannion

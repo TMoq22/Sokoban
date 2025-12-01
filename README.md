@@ -61,6 +61,15 @@ gcc sokoban.c -o sokoban
 ./sokoban
 ```
 
+Sinon utiliser le script run.sh
+```bash
+chmod +x run.sh
+```
+puis 
+```bash
+./run.sh
+```
+
 Le programme affiche la liste des fichiers .sok disponibles, puis demande le niveau :
 
 Entrer un niveau : niveau1.sok

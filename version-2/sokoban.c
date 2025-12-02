@@ -21,6 +21,7 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <ctype.h>
 // taille du tableau
 #define TAILLE 12
 #define TAILLE_DEPLACEMENT 5000
@@ -550,7 +551,7 @@ void memoriser_deplacement(char touche, t_tabDeplacement tabDeplacement,
     caracDeplacement = DROITE_SANS_CAISSE;
   }
   if (leDeplacement == AVEC_CAISSE) {
-    caracDeplacement -= 32;
+    caracDeplacement = toupper(caracDeplacement);
     // changement des minuscules en majuscules (tables ascii)
   }
   if (nbDeplacement < TAILLE_DEPLACEMENT) {

@@ -17,7 +17,7 @@
 <br>
 <br>  
 
-[Sokoban autonome](#) (comming soon)  <!-- [Sokoban autonome](https://github.com/TMoq22/Sokoban-autonome) -->
+[Sokoban autonome](https://github.com/TMoq22/Sokoban-autonome)
 
 <br>
 
